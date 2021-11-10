@@ -49,6 +49,21 @@ class FeigenBaumThread extends Thread{
     }
 }
 
+class GUIThread extends Thread{
+   Semaphore semaphore;
+    //other parameters
+
+
+    public GUIThread(Semaphore semaphore){
+        this.semaphore = semaphore;
+    }
+    @Override
+    public void run(){
+        //put code
+    }
+
+}
+
 public class Main {
 
     public static void main(String[] args) {
