@@ -46,7 +46,7 @@ class DrawPanel extends JPanel {
     private static int ST_WIDTH;
     private static int ST_HEIGHT;
     private static final Color BACKGROUND_COLOR = Color.black;
-    private static final float STROKE_WIDTH = 4f;
+    private static final float STROKE_WIDTH = 1f;
     private static final Stroke STROKE = new BasicStroke(STROKE_WIDTH,
             BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     //private static final Color[] colors = {Color.black, Color.blue, Color.red,Color.green, Color.orange, Color.MAGENTA};
@@ -81,21 +81,26 @@ class DrawPanel extends JPanel {
     }
 
     private void drawCurve(Graphics2D g2) {
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setStroke(STROKE);
+        try {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setStroke(STROKE);
 
-        if (points != null && points.size() > 1) {
-            for (int i = 0; i < points.size() - 1; i++) {
-                drawColor = Color.getHSBColor(((float)points.get(i).x/(float)ST_WIDTH),1.0f,0.8f);
-                g2.setColor(drawColor);
-                int x1 = points.get(i).x;
-                int y1 = points.get(i).y;
-                int x2 = points.get(i + 1).x;
-                int y2 = points.get(i + 1).y;
-                g2.drawLine(x1, y1, x2, y2);
+            if (points != null && points.size() > 1) {
+                for (int i = 0; i < points.size() - 1; i++) {
+                    drawColor = Color.getHSBColor(((float)points.get(i).x/(float)ST_WIDTH),1.0f,0.8f);
+                    g2.setColor(drawColor);
+                    int x1 = points.get(i).x;
+                    int y1 = points.get(i).y;
+                    int x2 = points.get(i + 1).x;
+                    int y2 = points.get(i + 1).y;
+                    g2.drawLine(x1, y1, x2, y2);
+                }
             }
+        }catch (Exception exception){
+
         }
+
     }
 
     @Override

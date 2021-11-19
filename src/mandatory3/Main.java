@@ -8,11 +8,11 @@ class SharedRes {
     static int maxBufferSize = 500;
     static int count = 0;
     static double[] values = new double[2];
-    static double[][] valueArray = new double[500][2];
+    static double[][] valueArray = new double[maxBufferSize][2];
     static int readHead = 0;
     static int writeHead = 0;
     static Semaphore fullSpaces = new Semaphore(0); //producer increments after every production, consumer decrement before after consumption
-    static Semaphore emptySpaces = new Semaphore(500); //producer decrement before production, consumer increment after production.
+    static Semaphore emptySpaces = new Semaphore(maxBufferSize); //producer decrement before production, consumer increment after production.
     static boolean reset = false;
 }
 
@@ -50,7 +50,7 @@ class FeigenBaumThread extends Thread{
         try {
             //increment shared resourc
             while(obj.increaseLambda()) {
-                for (int i = 0; i < 500; i++) {
+                for (int i = 0; i < SharedRes.maxBufferSize; i++) {
                     myArray = obj.feigenbaum();//calc values
 
                     SharedRes.emptySpaces.acquire(); // remove empty space, will wait if there is none
@@ -58,7 +58,7 @@ class FeigenBaumThread extends Thread{
 
                     SharedRes.valueArray[SharedRes.writeHead]  = myArray; //write content and move head
                    // System.out.println("[writeHead: " +SharedRes.writeHead + "]");
-                    SharedRes.writeHead = (SharedRes.writeHead + 1) % 500;
+                    SharedRes.writeHead = (SharedRes.writeHead + 1) % SharedRes.maxBufferSize;
 
                     semaphore.release(); //open
 
@@ -106,10 +106,10 @@ class GUIThread extends Thread{
                 ///// use plotter here with data from myArray
                 //System.out.println(myArray[0] + " " + myArray[1]); //display
                 //System.out.println("[readHead: " + SharedRes.readHead+"]");
-                painter.drawPoint((myArray[1]/5), (1-(myArray[0])));
+                    painter.drawPoint(((myArray[1]-1) / 3), (1 - (myArray[0])));
                 /////
 
-                SharedRes.readHead = (SharedRes.readHead + 1) % 500;
+                SharedRes.readHead = (SharedRes.readHead + 1) % SharedRes.maxBufferSize;
                 semaphore.release(); //open
 
                 SharedRes.emptySpaces.release(); // increment empty spaces
