@@ -47,12 +47,14 @@ class FeigenBaumThread extends Thread{
                     semaphore.acquire(); //lock
 
                     SharedRes.valueArray[SharedRes.writeHead]  = myArray; //write content and move head
-                    System.out.println("[writeHead: " +SharedRes.writeHead + "]");
+                   // System.out.println("[writeHead: " +SharedRes.writeHead + "]");
                     SharedRes.writeHead = (SharedRes.writeHead + 1) % 500;
 
                     semaphore.release(); //open
 
                     SharedRes.fullSpaces.release();//increment full spaces
+
+                    //Thread.sleep(100);
                 }
             }
         }catch ( InterruptedException interruptedException){
@@ -65,6 +67,7 @@ class GUIThread extends Thread{
    Semaphore semaphore;
     //other parameters
     double myArray[] = new double[2];
+    Painter painter = new Painter();
 
     public GUIThread(Semaphore semaphore){
         this.semaphore = semaphore;
@@ -82,11 +85,10 @@ class GUIThread extends Thread{
                 semaphore.acquire(); //lock
                 myArray = SharedRes.valueArray[SharedRes.readHead]; //read content and move head
 
-                System.out.println(myArray[0] + " " + myArray[1]); //display
-                System.out.println("[readHead: " + SharedRes.readHead+"]");
-
                 ///// use plotter here with data from myArray
-
+                //System.out.println(myArray[0] + " " + myArray[1]); //display
+                //System.out.println("[readHead: " + SharedRes.readHead+"]");
+                painter.drawPoint((myArray[0]/100), (myArray[1]/100));
                 /////
 
                 SharedRes.readHead = (SharedRes.readHead + 1) % 500;
@@ -112,6 +114,7 @@ public class Main {
 
         //creating and running the feigenbaum thread
 
+
         Thread gui = new GUIThread(semaphore);
         Thread feigen = new FeigenBaumThread(semaphore);
         gui.start();
@@ -119,17 +122,7 @@ public class Main {
 
 
 
-	    //testing making a window
-        JFrame frame = new JFrame("frame test");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Label emptyLabel = new Label("sup");
-        frame.getContentPane().add(emptyLabel, BorderLayout.CENTER);
-
-        frame.pack();
-        frame.setVisible(true);
-
-
-
+        //testing making a window
         try {
             feigen.join();
         } catch (InterruptedException interruptedException){
@@ -142,6 +135,8 @@ public class Main {
         } catch (InterruptedException interruptedException){
             interruptedException.printStackTrace();
         }
+
+
     }
 }
 
