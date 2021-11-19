@@ -13,6 +13,7 @@ class SharedRes {
     static int writeHead = 0;
     static Semaphore fullSpaces = new Semaphore(0); //producer increments after every production, consumer decrement before after consumption
     static Semaphore emptySpaces = new Semaphore(500); //producer decrement before production, consumer increment after production.
+    static boolean reset = false;
 }
 
 //thread that uses the feigenbaum
@@ -33,6 +34,15 @@ class FeigenBaumThread extends Thread{
         while(true) {//keep regenerating the tree
             runFeigenWithSem();
             obj.setLambda(1);
+
+            //send resset signal
+            try {
+                semaphore.acquire(); //lock
+                SharedRes.reset = true;
+                semaphore.release(); //open
+            }catch (InterruptedException interruptedException){
+                interruptedException.printStackTrace();
+            }
         }
     }
 
@@ -54,7 +64,6 @@ class FeigenBaumThread extends Thread{
 
                     SharedRes.fullSpaces.release();//increment full spaces
 
-                    //Thread.sleep(100);
                 }
             }
         }catch ( InterruptedException interruptedException){
@@ -83,12 +92,21 @@ class GUIThread extends Thread{
                 //System.out.println("in Gui after fullLock");
 
                 semaphore.acquire(); //lock
+
+                //if the screen needs to reset
+                if(SharedRes.reset == true){
+                    Thread.sleep(500); //wait to show work
+                    painter.clear();
+                    SharedRes.reset = false;
+                }
+
+
                 myArray = SharedRes.valueArray[SharedRes.readHead]; //read content and move head
 
                 ///// use plotter here with data from myArray
                 //System.out.println(myArray[0] + " " + myArray[1]); //display
                 //System.out.println("[readHead: " + SharedRes.readHead+"]");
-                painter.drawPoint((myArray[0]/100), (myArray[1]/100));
+                painter.drawPoint((myArray[1]/5), (1-(myArray[0])));
                 /////
 
                 SharedRes.readHead = (SharedRes.readHead + 1) % 500;
@@ -135,6 +153,25 @@ public class Main {
         } catch (InterruptedException interruptedException){
             interruptedException.printStackTrace();
         }
+
+
+        /*
+        Painter painter = new Painter();
+
+        int i = 1;
+        while(true) {
+            i++;
+            painter.drawPoint(0.0001*i, 0.0001*i);
+            try {
+                System.out.println(i*0.0001);
+                Thread.sleep(1);
+            } catch (Exception exception){
+                exception.printStackTrace();
+            }
+        }
+        */
+
+
 
 
     }

@@ -8,6 +8,7 @@ public class feigenbaumClass {
     public void setLambda(double lambda) {
         this.lambda = lambda;
     }
+    public double getLambda(){return lambda;}
 
     public void setOut(double out) {
         this.out = out;
