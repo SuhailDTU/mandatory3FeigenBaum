@@ -20,14 +20,12 @@ class SharedRes {
 //tries to access resource at the same time
 class FeigenBaumThread extends Thread{
     Semaphore semaphore;
-    int limit;
     feigenbaumClass obj = new feigenbaumClass();
     double myArray[] = new double[2];
 
 
     public FeigenBaumThread(Semaphore semaphore){
         this.semaphore = semaphore;
-        this.limit = limit;
     }
     @Override
     public void run(){
@@ -35,7 +33,7 @@ class FeigenBaumThread extends Thread{
             runFeigenWithSem();
             obj.setLambda(1);
 
-            //send resset signal
+            //send reset signal
             try {
                 semaphore.acquire(); //lock
                 SharedRes.reset = true;
@@ -86,10 +84,8 @@ class GUIThread extends Thread{
         //put code
         try {
             while(true) {
-                //System.out.println("in Gui before fullLock");
-                //System.out.println(SharedRes.fullSpaces);
+
                 SharedRes.fullSpaces.acquire(); // remove content, will wait if there is none
-                //System.out.println("in Gui after fullLock");
 
                 semaphore.acquire(); //lock
 
@@ -130,49 +126,24 @@ public class Main {
 
         Semaphore semaphore = new Semaphore(1);
 
-        //creating and running the feigenbaum thread
-
-
+        //creating and running the threads
         Thread gui = new GUIThread(semaphore);
         Thread feigen = new FeigenBaumThread(semaphore);
         gui.start();
         feigen.start();
 
 
-
-        //testing making a window
+        //waiting for the threads to terminate
         try {
             feigen.join();
         } catch (InterruptedException interruptedException){
             interruptedException.printStackTrace();
         }
-
-
         try {
             gui.join();
         } catch (InterruptedException interruptedException){
             interruptedException.printStackTrace();
         }
-
-
-        /*
-        Painter painter = new Painter();
-
-        int i = 1;
-        while(true) {
-            i++;
-            painter.drawPoint(0.0001*i, 0.0001*i);
-            try {
-                System.out.println(i*0.0001);
-                Thread.sleep(1);
-            } catch (Exception exception){
-                exception.printStackTrace();
-            }
-        }
-        */
-
-
-
 
     }
 }
