@@ -5,15 +5,14 @@ import java.awt.*;
 import java.util.concurrent.Semaphore;
 
 class SharedRes {
-    static int maxBufferSize = 500;
-    static int count = 0;
-    static double[] values = new double[2];
+    static int maxBufferSize = 150000;
     static double[][] valueArray = new double[maxBufferSize][2];
     static int readHead = 0;
     static int writeHead = 0;
     static Semaphore fullSpaces = new Semaphore(0); //producer increments after every production, consumer decrement before after consumption
     static Semaphore emptySpaces = new Semaphore(maxBufferSize); //producer decrement before production, consumer increment after production.
     static boolean reset = false;
+    static int resetLocation = 0;
 }
 
 //thread that uses the feigenbaum
@@ -32,11 +31,11 @@ class FeigenBaumThread extends Thread{
         while(true) {//keep regenerating the tree
             runFeigenWithSem();
             obj.setLambda(1);
-
             //send reset signal
             try {
                 semaphore.acquire(); //lock
                 SharedRes.reset = true;
+                SharedRes.resetLocation = SharedRes.writeHead;
                 semaphore.release(); //open
             }catch (InterruptedException interruptedException){
                 interruptedException.printStackTrace();
@@ -48,20 +47,19 @@ class FeigenBaumThread extends Thread{
         try {
             //increment shared resourc
             while(obj.increaseLambda()) {
-                for (int i = 0; i < SharedRes.maxBufferSize; i++) {
+                for (int i = 0; i < 500; i++) {
                     myArray = obj.feigenbaum();//calc values
 
                     SharedRes.emptySpaces.acquire(); // remove empty space, will wait if there is none
                     semaphore.acquire(); //lock
 
                     SharedRes.valueArray[SharedRes.writeHead]  = myArray; //write content and move head
-                   // System.out.println("[writeHead: " +SharedRes.writeHead + "]");
+                    //System.out.println("[writeHead: " +SharedRes.writeHead + "]");
                     SharedRes.writeHead = (SharedRes.writeHead + 1) % SharedRes.maxBufferSize;
 
                     semaphore.release(); //open
 
                     SharedRes.fullSpaces.release();//increment full spaces
-
                 }
             }
         }catch ( InterruptedException interruptedException){
@@ -90,12 +88,11 @@ class GUIThread extends Thread{
                 semaphore.acquire(); //lock
 
                 //if the screen needs to reset
-                if(SharedRes.reset == true){
+                if(SharedRes.reset == true && (SharedRes.resetLocation == SharedRes.readHead)){
                     Thread.sleep(500); //wait to show work
                     painter.clear();
                     SharedRes.reset = false;
                 }
-
 
                 myArray = SharedRes.valueArray[SharedRes.readHead]; //read content and move head
 
@@ -125,7 +122,6 @@ public class Main {
 
 
         Semaphore semaphore = new Semaphore(1);
-
         //creating and running the threads
         Thread gui = new GUIThread(semaphore);
         Thread feigen = new FeigenBaumThread(semaphore);

@@ -2,6 +2,9 @@ package mandatory3;
 
 import java.util.concurrent.Semaphore;
 
+class SharedResEx {
+    static int count = 0;
+}
 public class ThreadExamples {
 }
 //tries to access resource after each other
@@ -24,8 +27,8 @@ class Thread1 extends Thread{
 
             //increment shared resource
             while(limit > 0){
-                SharedRes.count++;
-                System.out.println("counter: " + SharedRes.count);
+                SharedResEx.count++;
+                System.out.println("counter: " + SharedResEx.count);
                 limit--;
             }
 
@@ -62,8 +65,8 @@ class Thread2 extends Thread{
                 System.out.println(name + ":Acquired permit");
 
 
-                SharedRes.count++;
-                System.out.println("counter: " + SharedRes.count);
+                SharedResEx.count++;
+                System.out.println("counter: " + SharedResEx.count);
                 limit--;
 
                 // Release the permit.
