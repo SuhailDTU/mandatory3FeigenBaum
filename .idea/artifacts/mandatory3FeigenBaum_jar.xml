@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="mandatory3FeigenBaum:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/mandatory3FeigenBaum_jar</output-path>
+    <root id="archive" name="mandatory3FeigenBaum.jar">
+      <element id="module-output" name="mandatory3FeigenBaum" />
+    </root>
+  </artifact>
+</component>
